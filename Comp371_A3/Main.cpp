@@ -34,8 +34,8 @@ glm::vec3 axis = glm::vec3(1,0,0);
 float angle = -90.0f;
 
 // light and object color
-vector<glm::vec3> light_positions = {glm::vec3(10.0f, 15.0f, 5.0f), glm::vec3(-10.0f, 15.0f, 5.0f), glm::vec3(0.0f, 15.0f, 5.0f), glm::vec3(0.0f, 0.0f, 25.0f)};
-vector<glm::vec3> light_color = {glm::vec3(0.2f, 0.05f, 0.05f), glm::vec3(0.05f, 0.2f, 0.05f), glm::vec3(0.05f, 0.05f, 0.2f), glm::vec3(0.05f, 0.05f, 0.05f)};
+glm::vec3 light_positions[4] = {glm::vec3(10.0f, 15.0f, 5.0f), glm::vec3(-10.0f, 15.0f, 5.0f), glm::vec3(0.0f, 15.0f, 5.0f), glm::vec3(0.0f, 0.0f, 25.0f)};
+glm::vec3 light_colors[4] = {glm::vec3(0.2f, 0.05f, 0.05f), glm::vec3(0.05f, 0.2f, 0.05f), glm::vec3(0.05f, 0.05f, 0.2f), glm::vec3(0.05f, 0.05f, 0.05f)};
 glm::vec3 object_color = glm::vec3(0.9f, 0.9f, 0.9f);
 
 //*******************************
@@ -343,16 +343,9 @@ int main()
         glUniform3fv(glGetUniformLocation(shader, "object_color"), 1, glm::value_ptr(object_color));
         glUniform3fv(glGetUniformLocation(shader, "view_position"), 1, glm::value_ptr(camera_position));
         
-        glUniform3fv(glGetUniformLocation(shader, "light_color1"), 1, glm::value_ptr(light_color[0]));
-        glUniform3fv(glGetUniformLocation(shader, "light_color2"), 1, glm::value_ptr(light_color[1]));
-        glUniform3fv(glGetUniformLocation(shader, "light_color3"), 1, glm::value_ptr(light_color[2]));
-        glUniform3fv(glGetUniformLocation(shader, "light_color4"), 1, glm::value_ptr(light_color[3]));
-        
-        glUniform3fv(glGetUniformLocation(shader, "light_position1"), 1, glm::value_ptr(light_positions[0]));
-        glUniform3fv(glGetUniformLocation(shader, "light_position2"), 1, glm::value_ptr(light_positions[1]));
-        glUniform3fv(glGetUniformLocation(shader, "light_position3"), 1, glm::value_ptr(light_positions[2]));
-        glUniform3fv(glGetUniformLocation(shader, "light_position4"), 1, glm::value_ptr(light_positions[3]));
-        
+        glUniform3fv(glGetUniformLocation(shader, "light_colors"), 4, glm::value_ptr(light_colors[0]));
+        glUniform3fv(glGetUniformLocation(shader, "light_positions"), 4, glm::value_ptr(light_positions[0]));
+        //glUniform1fv(glGetUniformLocation(program, "v"), 10, v);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size());

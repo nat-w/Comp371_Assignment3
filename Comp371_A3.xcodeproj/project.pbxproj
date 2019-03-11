@@ -33,7 +33,6 @@
 		410B9FAE22307AD6001DBEDF /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stdafx.cpp; sourceTree = "<group>"; };
 		410B9FAF22307AD6001DBEDF /* glm */ = {isa = PBXFileReference; lastKnownFileType = folder; path = glm; sourceTree = "<group>"; };
 		410B9FB022307AD6001DBEDF /* targetver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = targetver.h; sourceTree = "<group>"; };
-		410B9FB122307AD6001DBEDF /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		410B9FB222307AD6001DBEDF /* vertex.shader */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vertex.shader; sourceTree = "<group>"; };
 		410B9FB322307AD6001DBEDF /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
 		410B9FB422307AD6001DBEDF /* glew */ = {isa = PBXFileReference; lastKnownFileType = folder; path = glew; sourceTree = "<group>"; };
@@ -43,6 +42,7 @@
 		410B9FB822307AD6001DBEDF /* OBJloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJloader.h; sourceTree = "<group>"; };
 		410B9FBC22307AFA001DBEDF /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../../../opt/local/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
 		410B9FBE22307B0E001DBEDF /* libGLEW.2.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.2.1.0.dylib; path = ../../../../../../opt/local/lib/libGLEW.2.1.0.dylib; sourceTree = "<group>"; };
+		4128FCA82236EB850013D04E /* README.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		41775279223460DB0064B4AD /* cat.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cat.obj; sourceTree = "<group>"; };
 		4177527A223461E80064B4AD /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = Comp371_A3/Main.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -86,11 +86,11 @@
 				410B9FB422307AD6001DBEDF /* glew */,
 				410B9FB522307AD6001DBEDF /* glfw */,
 				410B9FAF22307AD6001DBEDF /* glm */,
+				4128FCA82236EB850013D04E /* README.txt */,
 				4177527A223461E80064B4AD /* Main.cpp */,
+				410B9FB822307AD6001DBEDF /* OBJloader.h */,
 				410B9FB222307AD6001DBEDF /* vertex.shader */,
 				410B9FB622307AD6001DBEDF /* fragment.shader */,
-				410B9FB822307AD6001DBEDF /* OBJloader.h */,
-				410B9FB122307AD6001DBEDF /* README.txt */,
 				410B9FB722307AD6001DBEDF /* shaderloader.h */,
 				410B9FAE22307AD6001DBEDF /* stdafx.cpp */,
 				410B9FB322307AD6001DBEDF /* stdafx.h */,
