@@ -21,6 +21,7 @@ using namespace std;
 
 float yPos = 0.0f, yPrev = 0.0f;
 bool canMove = false;
+bool multiLight = true, shadow = false;
 
 // camera
 glm::vec3 camera_position = glm::vec3(0,5,20);
@@ -34,9 +35,11 @@ glm::vec3 axis = glm::vec3(1,0,0);
 float angle = -90.0f;
 
 // light and object color
+glm::vec3 light_position = glm::vec3(0.0f, 20.0f, 10.0f);
+glm::vec3 light_color = glm::vec3(0.8f, 0.2f, 0.2f);
 glm::vec3 light_positions[4] = {glm::vec3(10.0f, 15.0f, 5.0f), glm::vec3(-10.0f, 15.0f, 5.0f), glm::vec3(0.0f, 15.0f, 5.0f), glm::vec3(0.0f, 0.0f, 25.0f)};
 glm::vec3 light_colors[4] = {glm::vec3(0.2f, 0.05f, 0.05f), glm::vec3(0.05f, 0.2f, 0.05f), glm::vec3(0.05f, 0.05f, 0.2f), glm::vec3(0.05f, 0.05f, 0.05f)};
-glm::vec3 object_color = glm::vec3(0.9f, 0.9f, 0.9f);
+glm::vec3 object_color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 //*******************************
 //            INPUT
@@ -153,10 +156,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 translate_factor += glm::vec3(0,0,-0.5f);
                 break;
             case GLFW_KEY_F1:
-                //TODO
+                multiLight = !multiLight;
                 break;
             case GLFW_KEY_F2:
-                //TODO
+                shadow = !shadow;
                 break;
             default:
                 break;
@@ -313,7 +316,7 @@ int main()
 
     // Render
 		// Clear the colorbuffer
-		glClearColor(0.3f, 0.4f, 0.4f, 1.0f);
+		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         glUseProgram(shader);
@@ -345,10 +348,15 @@ int main()
         
         glUniform3fv(glGetUniformLocation(shader, "light_colors"), 4, glm::value_ptr(light_colors[0]));
         glUniform3fv(glGetUniformLocation(shader, "light_positions"), 4, glm::value_ptr(light_positions[0]));
-        //glUniform1fv(glGetUniformLocation(program, "v"), 10, v);
+        glUniform3fv(glGetUniformLocation(shader, "light_color"), 1, glm::value_ptr(light_color));
+        glUniform3fv(glGetUniformLocation(shader, "light_position"), 1, glm::value_ptr(light_position));
+        
+        glUniform1i(glGetUniformLocation(shader, "multi_light"), multiLight);
+        glUniform1i(glGetUniformLocation(shader, "shadow"), shadow);
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 		glBindVertexArray(0);
 
 		// Swap the screen buffers
