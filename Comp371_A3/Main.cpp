@@ -234,10 +234,6 @@ int main()
 		return -1;
 	}
     
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-    
     //*******************************
     //          SHADERS
     //*******************************
@@ -282,6 +278,11 @@ int main()
     glBindVertexArray(0);
     
     //*******************************
+    //          DEPTH MAP
+    //*******************************
+    
+    
+    //*******************************
     //            CAMERA
     //*******************************
     
@@ -303,7 +304,7 @@ int main()
     
     // depth testing
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS);
+    //glDepthFunc(GL_ALWAYS);
     
     //*******************************
     //           GAME LOOP
@@ -316,7 +317,7 @@ int main()
 
     // Render
 		// Clear the colorbuffer
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		glClearColor(0.3f, 0.4f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         glUseProgram(shader);
@@ -330,7 +331,7 @@ int main()
         }
         
         // apply transformations
-        View = glm::lookAt(camera_direction, camera_position, camera_up);
+        View = glm::lookAt(camera_direction, camera_position + camera_direction, camera_up);
         
         glm::mat4 translator = glm::translate(glm::mat4(1.0f), translate_factor);
         glm::mat4 rotator = glm::rotate(glm::mat4(1.0f), angle, axis);

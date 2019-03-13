@@ -16,15 +16,15 @@ in vec3 norm;
 
 void main()
 {
-    float ambient_strength = 0.25;
-    float diffuse_strength_coef = 0.75;
+    float ambient_strength = 0.25f;
+    float diffuse_strength_coef = 0.75f;
     float specular_strength_coef = 1.0f;
 
     vec3 final_color = object_color;
 
     if (multi_light == 1) {
         vec3 colors[4];
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 0; i < 4; i++) {
             //Ambient
             vec3 ambient = ambient_strength * light_colors[i];
 
@@ -65,4 +65,4 @@ void main()
         final_color = (specular + diffuse + ambient) * object_color;
     }
     result = vec4(final_color, 1.0f);
-} 
+}
