@@ -10,9 +10,12 @@ uniform vec3 light_color;
 uniform vec3 light_position;
 uniform int multi_light;
 uniform int shadow;
+uniform sampler2D shadow_map;
 
 in vec3 fragment_position;
 in vec3 norm;
+in vec2 tex_coords;
+in vec4 light_space_fragment_position;
 
 void main()
 {
@@ -37,15 +40,21 @@ void main()
             //Specular
             vec3 view_direction = normalize(view_position - fragment_position);
             vec3 reflect_light_direction = reflect(-light_direction, normalize(norm));
-            float specular_strength = pow(max(dot(reflect_light_direction, view_direction), 0.0f),32);
+            float specular_strength = pow(max(dot(reflect_light_direction, view_direction), 0.0f),64);
             vec3 specular = specular_strength * light_colors[i];
             specular *= specular_strength_coef;
 
             colors[i] = (specular + diffuse + ambient) * object_color;
         }
-        final_color = colors[0] + colors[1] + colors[2] + colors[3];
+        final_color = colors[0] + colors[1] + colors[2] + colors[3] * object_color;
     }
     else if (shadow == 1) {
+        vec3 projCoords = light_space_fragment_position.xyz / light_space_fragment_position.w;
+        projCoords = projCoords * 0.5 + 0.5;
+        float closestDepth = texture(shadow_map, projCoords.xy).r;
+        float currentDepth = projCoords.z;
+        float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+        
         // Ambient
         vec3 ambient = ambient_strength * light_color;
 
@@ -62,7 +71,7 @@ void main()
         vec3 specular = specular_strength * light_color;
         specular *= specular_strength_coef;
 
-        final_color = (specular + diffuse + ambient) * object_color;
+        final_color = ((1.0f - shadow) * (specular + diffuse) + ambient) * object_color;
     }
     result = vec4(final_color, 1.0f);
 }

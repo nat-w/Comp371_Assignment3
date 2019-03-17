@@ -156,10 +156,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 translate_factor += glm::vec3(0,0,-0.5f);
                 break;
             case GLFW_KEY_F1:
-                multiLight = !multiLight;
+                multiLight = true;
+                shadow = false;
                 break;
             case GLFW_KEY_F2:
-                shadow = !shadow;
+                shadow = true;
+                multiLight = false;
                 break;
             default:
                 break;
@@ -215,7 +217,6 @@ int init() {
 //*******************************
 int main()
 {
-    
 	if (init() != 0)
 		return EXIT_FAILURE;
     
@@ -240,12 +241,20 @@ int main()
     
 	GLuint shader = loadSHADER("/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/vertex.shader", "/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/fragment.shader");
     
+    GLuint shadow_shader = loadSHADER("/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/shadowVertex.shader", "/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/shadowFragment.shader");
+    
     // OBJ file vertices
     std::vector<int> indices;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> UVs;
-	loadOBJ(indices, vertices, normals, UVs);
+    
+    std::vector<int> floor_indices;
+    std::vector<glm::vec3> floor_vertices;
+    std::vector<glm::vec3> floor_normals;
+    std::vector<glm::vec2> floor_UVs;
+	loadOBJ("/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/heracles.obj", indices, vertices, normals, UVs);
+    loadOBJ("/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/plane.obj", floor_indices, floor_vertices, floor_normals, floor_UVs);
     
     //*******************************
     //      SET UP VAO AND VBO
@@ -274,13 +283,55 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices.front(), GL_STATIC_DRAW);
     
+    GLuint floor_VAO;
+    glGenVertexArrays(2, &floor_VAO);
+    glBindVertexArray(floor_VAO);
+    
+    GLuint floor_vertices_VBO;
+    glGenBuffers(1, &floor_vertices_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, floor_vertices_VBO);
+    glBufferData(GL_ARRAY_BUFFER, floor_vertices.size() * sizeof(glm::vec3), &floor_vertices.front(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    GLuint floor_normals_VBO;
+    glGenBuffers(1, &floor_normals_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, floor_normals_VBO);
+    glBufferData(GL_ARRAY_BUFFER, floor_normals.size() * sizeof(glm::vec3), &floor_normals.front(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+
+    GLuint floor_EBO;
+    glGenBuffers(1, &floor_EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floor_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, floor_indices.size() * sizeof(int), &floor_indices.front(), GL_STATIC_DRAW);
+
     // Unbind VAO
     glBindVertexArray(0);
     
     //*******************************
     //          DEPTH MAP
     //*******************************
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
     
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    glUseProgram(shader);
+    //FIXME what is shadow_map?
+    glUniform1i(glGetUniformLocation(shader, "shadow_map"), 0);
     
     //*******************************
     //            CAMERA
@@ -304,7 +355,7 @@ int main()
     
     // depth testing
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_ALWAYS);
+    glDepthFunc(GL_LESS);
     
     //*******************************
     //           GAME LOOP
@@ -315,12 +366,37 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 
-    // Render
-		// Clear the colorbuffer
-		glClearColor(0.3f, 0.4f, 0.4f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // First Render
+        glCullFace(GL_FRONT);
+        glUseProgram(shadow_shader);
         
+        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f);
+        glm::mat4 lightView = glm::lookAt(light_position, glm::vec3( 0.0f, 0.0f,  0.0f), camera_up);
+        glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+        
+        glUniformMatrix4fv(glGetUniformLocation(shadow_shader, "shadowModel"), 1, 0, glm::value_ptr(Model));
+        glUniformMatrix4fv(glGetUniformLocation(shadow_shader, "lightSpaceMatrix"), 1, 0, glm::value_ptr(lightSpaceMatrix));
+        glViewport(0, 0, 1024, 1024);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(floor_VAO);
+        glDrawElements(GL_TRIANGLES, floor_indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCullFace(GL_BACK);
+        
+        // Second Render
         glUseProgram(shader);
+        glViewport(0, 0, 1624, 1624);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+
+        glUniformMatrix4fv(glGetUniformLocation(shader, "lightSpaceMatrix"), 1, 0, glm::value_ptr(lightSpaceMatrix));
+
         
         if (canMove && (yPos > yPrev)) {
             camera_position += camera_direction * 0.05f;
@@ -343,6 +419,7 @@ int main()
         glUniformMatrix4fv(ViewID, 1, 0, glm::value_ptr(View));
         glUniformMatrix4fv(ProjectionID, 1, 0, glm::value_ptr(Projection));
         
+        
         // pass light color and variables to shader
         glUniform3fv(glGetUniformLocation(shader, "object_color"), 1, glm::value_ptr(object_color));
         glUniform3fv(glGetUniformLocation(shader, "view_position"), 1, glm::value_ptr(camera_position));
@@ -354,16 +431,19 @@ int main()
         
         glUniform1i(glGetUniformLocation(shader, "multi_light"), multiLight);
         glUniform1i(glGetUniformLocation(shader, "shadow"), shadow);
-
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        //glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-		glBindVertexArray(0);
+        
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        
+        //glUniformMatrix4fv(ModelID, 1, 0, glm::value_ptr(FloorModel));
+        glBindVertexArray(floor_VAO);
+        glDrawElements(GL_TRIANGLES, floor_indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
-
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
 	return 0;

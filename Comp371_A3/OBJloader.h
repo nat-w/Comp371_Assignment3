@@ -5,6 +5,7 @@
 #include "glm/glm.hpp"
 
 bool loadOBJ(
+             char * path,
              std::vector<int> & vertexIndices,
              std::vector<glm::vec3> & temp_vertices,
              std::vector<glm::vec3> & out_normals,
@@ -15,7 +16,7 @@ bool loadOBJ(
     std::vector<glm::vec3> temp_normals;
     
     FILE * file;
-    file = fopen("/Users/nat/Desktop/Classes/Comp\ 371/Comp371_A3/Comp371_A3/heracles.obj", "r");
+    file = fopen(path, "r");
     
     while (1){
 

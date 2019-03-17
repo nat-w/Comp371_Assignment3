@@ -21,7 +21,5 @@ I - move object along +Y
 K - move object along -Y
 Y - move object along +Z 
 U - move object along -Z
-F1 -
-F2 -
-
-I had to make all paths absolute for the code to work on my machine, therefore it might not work when run on another computer.
+F1 - multiple lights (part 1)
+F2 - shadow (part 2)
